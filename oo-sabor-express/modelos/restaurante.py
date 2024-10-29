@@ -1,5 +1,7 @@
 ### Construção do aplicativo Sabor Express utilizando o paradigma de OO ###
 
+from modelos.avaliacao import Avaliacao
+
 class Restaurante:
   restaurantes = []
 
@@ -8,6 +10,7 @@ class Restaurante:
     self._nome = nome.title() # O title() transforma a primeira letra da string em maiúsculo
     self._categoria = categoria
     self._ativo = False # Ao adicionar o underline, o atributo passa a ser protegido, pois o valor dele não será alterado pelo o usuário
+    self._avaliacao = []
 
     Restaurante.restaurantes.append(self) # Adiciona o novo objeto/restaurante na lista restaurantes
 
@@ -17,9 +20,9 @@ class Restaurante:
   
   @classmethod # O @classmethod é um decorator usado para métodos da classe, ou seja, métodos que fazem referência a própria classe
   def listar_restaurantes(cls): # O 'cls' é uma convenção que faz referência a classe
-    print(f'{'Nome do restaurante'.ljust(20)} | {'Categoria'.ljust(20)} | Status')
+    print(f'{'Nome do restaurante'.ljust(20)} | {'Categoria'.ljust(20)} | {'Avaliação'.ljust(20)} | Status')
     for restaurante in cls.restaurantes:
-      print(f'{restaurante._nome.ljust(20)} | {restaurante._categoria.ljust(20)} | {restaurante.ativo}')
+      print(f'{restaurante._nome.ljust(20)} | {restaurante._categoria.ljust(20)} | {str(restaurante.media_avaliacoes).ljust(20)} | {restaurante.ativo}')
 
   @property # O @property é um decorator usado quando queremos pegar um atributo e modificar a forma de como ele vai ser lido
   def ativo(self):
@@ -28,9 +31,16 @@ class Restaurante:
   def alternar_estado(self):
     self._ativo = not self._ativo
 
-restaurante_praca = Restaurante('Praça', 'Comida Brasileira')
-restaurante_praca.alternar_estado()
+  def receber_avaliacao(self, cliente, nota):
+    avaliacao = Avaliacao(cliente, nota)
+    self._avaliacao.append(avaliacao)
 
-restaurante_pizza = Restaurante('Pizzaria Central', 'Italiana')
-
-Restaurante.listar_restaurantes()
+  @property
+  def media_avaliacoes(self):
+    if not self._avaliacao:
+      return 0
+    
+    soma_das_notas = sum(avaliacao._nota for avaliacao in self._avaliacao) # Pega todas as avaliações da lista avaliacao[] e para cada avaliacao, pegue o item/a propriedade nota e faça a soma delas
+    quantidade_de_notas = len(self._avaliacao)
+    media = round(soma_das_notas / quantidade_de_notas, 1)
+    return media
